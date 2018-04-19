@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>猫眼电影</title>
+    <script>
+        (function (doc, win) {
+            var docEl = win.document.documentElement;
+            var resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+            var metaEl = doc.querySelector('meta[name="viewport"]');
+            var dpr = 0;
+            var scale = 0;
+
+            // 对iOS设备进行dpr的判断，对于Android系列，始终认为其dpr为1
+            if (!dpr && !scale) {
+                var isAndroid = win.navigator.appVersion.match(/android/gi);
+                var isIPhone = win.navigator.appVersion.match(/[iphone|ipad]/gi);
+                var devicePixelRatio = win.devicePixelRatio;
+
+                if (isIPhone) {
+                    dpr = devicePixelRatio;
+                } else {
+                    drp = 1;
+                }
+
+                scale = 1 / dpr;
+            }
+
+            /**
+              * ================================================
+              *   设置data-dpr和viewport
+              × ================================================
+              */
+
+            docEl.setAttribute('data-dpr', dpr);
+            // 动态改写meta:viewport标签
+            if (!metaEl) {
+                metaEl = doc.createElement('meta');
+                metaEl.setAttribute('name', 'viewport');
+                metaEl.setAttribute('content', 'width=device-width, initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable=no');
+                document.documentElement.firstElementChild.appendChild(metaEl);
+            } else {
+                metaEl.setAttribute('content', 'width=device-width, initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable=no');
+            }
+            /**
+             * ================================================
+             *   设置根元素font-size
+             * 当设备宽度为375(iPhone6)时，根元素font-size=16px; 
+             × ================================================
+            */
+            var refreshRem = function () {
+                var clientWidth = win.innerWidth
+                    || doc.documentElement.clientWidth
+                    || doc.body.clientWidth;
+
+                console.log(clientWidth)
+                if (!clientWidth) return;
+                var fz;
+                var width = clientWidth;
+                fz = 16 * width / 375;
+                docEl.style.fontSize = fz + 'px';
+            };
+
+            if (!doc.addEventListener) return;
+            win.addEventListener(resizeEvt, refreshRem, false);
+            doc.addEventListener('DOMContentLoaded', refreshRem, false);
+            refreshRem();
+        })(document, window);
+    </script>
+</head>
+
+<body>
+    <!-- 头部：导航栏 -->
+    <header>
+        <h1>猫眼电影</h1>
+        <div class="header-nav">
+            <div class="nav-left">
+                <span>广州</span>
+                <i class="arrow-down"></i>
+            </div>
+            <div class="nav-middle">
+                <ul>
+                    <li class="active">正在热映</li>
+                    <li>即将上映</li>
+                </ul>
+            </div>
+            <div class="nav-right"></div>
+        </div>
+    </header>
+    <!-- 中部：具体电影信息等 -->
+    <div class="main">
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+        <article class="article">
+            <div class="article-left">
+                <img src="https://p0.meituan.net/128.180/movie/75fc3610bfe91b6ad8ae5f186f1c2fd6294933.jpg" alt="">
+            </div>
+            <div class="article-middle">
+                <div class="title">狂暴巨兽
+                    <span class="imax"></span>
+                </div>
+                <div class="score">观众评
+                    <span class="score-number">9.0</span>
+                </div>
+                <div class="actor">主演: 道恩·强森,娜奥米·哈里斯,玛琳·阿克曼</div>
+                <div class="times">今天172家影院放映3167场</div>
+            </div>
+            <div class="article-right">
+                <button>购票</button>
+            </div>
+        </article>
+    </div>
+    <!-- 脚部：固定的tabs -->
+    <footer>
+        <div class="footer-left active">
+            <i class="iconfont movie icon-dianyingpiaoiocn"></i>
+            <span>电影</span>
+        </div>
+        <div class="footer-middle">
+            <i class="cinema iconfont icon-yingyuana"></i>
+            <span>影院</span>
+        </div>
+        <div class="footer-right">
+            <i class="owner iconfont icon-tubiao-"></i>
+            <span>我的</span>
+        </div>
+    </footer>
+</body>
+
+</html>
