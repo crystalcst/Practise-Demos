@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sokoban</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .game {
+            width: 560px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+
+<body onkeydown="doKeyDown(event)">
+    <div class="game">
+        <canvas id="canvas" width="560" height="560"></canvas>
+        <div id="msg"></div>
+    </div>
+
+    <script src="./js/mapdata100.js"></script>
+    <script>
+        var canvas = document.querySelector('canvas');
+        var msg = document.getElementById('msg');
+        var ctx = canvas.getContext('2d');
+        var w = 35, h = 35;
+        var curMap; // 当前地图
+        var curLevel; // 当前等级地图
+        var curMan; // 初始化小人
+        var iCurLevel = 0; // 关卡数
+        var moveTimes = 0; // 移动次数
+
+        // 预加载图片
+        var oImgs = {
+            "block": "images/block.gif",
+            "wall": "images/wall.png",
+            "box": "images/box.png",
+            "ball": "images/ball.png",
+            "up": "images/up.png",
+            "down": "images/down.png",
+            "left": "images/left.png",
+            "right": "images/right.png",
+        }
+
+        function imgPreload(srcs, callback) {
+            var count = 0, imgNum = 0, images = {};
+
+            for (src in srcs) {
+                imgNum++;
+            }
+
+            for (src in srcs) {
+                images[src] = new Image();
+                images[src].onload = function () {
+                    if (++count >= imgNum) {
+                        callback(images);
+                    }
+                }
+                images[src].src = srcs[src];
+            }
+        }
+        var block, wall, box, ball, up, down, left, right;
+        imgPreload(oImgs, function (images) {
+            //console.log(images.block);
+            block = images.block;
+            wall = images.wall;
+            box = images.box;
+            ball = images.ball;
+            up = images.up;
+            down = images.down;
+            left = images.left;
+            right = images.right;
+            init();
+        });
+
+        function init() {
+            initLevel(); // 初始化对应等级游戏;
+            showMoveInfo(); // 初始化对应等级游戏数据
+        }
+
+        // 推箱子的动作，与上下左右关联
+        function doKeyDown(evt) {
+            var aKeyLists = { // 键盘Keycode及对应方向
+                37: 'left',
+                38: 'up',
+                39: 'right',
+                40: 'down'
+
+            };
+
+            go(aKeyLists[evt.keyCode]);
+        }
+
+        // 绘制地板
+        function DrawFloor() {
+            for (var i = 0; i < 16; i++) {
+                for (var j = 0; j < 16; j++) {
+                    ctx.drawImage(block, w * j, h * i, w, h);
+                }
+            }
+        }
+
+        // 绘制关卡地图
+        function DrawMap(level) {
+            for (var i = 0; i < level.length; i++) {
+                for (var j = 0; j < level[i].length; j++) {
+                    var pic = block; // 初始图片
+                    switch (level[i][j]) {
+                        case 1: // 绘制墙壁
+                            pic = wall;
+                            break;
+                        case 2: // 绘制陷阱
+                            pic = ball;
+                            break;
+                        case 3: // 绘制箱子
+                            pic = box;
+                            break;
+                        case 4: // 绘制小人
+                            pic = curMan; // 小人朝向
+                            // 获取小人坐标
+                            perPosition.x = i;
+                            perPosition.y = j;
+                            break;
+                        case 5: // 绘制箱子及陷阱位置
+                            pic = box;
+                            break;
+                    }
+                    // 地板中心绘图
+                    ctx.drawImage(pic, w * j - (pic.width - w) / 2, h * i - (pic.height - h), pic.width, pic.height);
+                }
+            }
+        }
+
+        // 小人的初始坐标
+        function Point(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        var perPosition = new Point(5, 5);
+
+        function initLevel() {
+            curMap = copyArray(levels[iCurLevel]); // 当前移动过的地图
+            curLevel = levels[iCurLevel]; // 当前等级的初始地图
+            curMan = down; // 初始化小人
+            DrawFloor(); // 绘制地板
+            DrawMap(curMap); // 绘制出当前等级地图
+        }
+
+        // 人物移动
+        function go(dir) {
+            var p1, p2;
+            var offX, offY;
+            var oPositions = {
+                'up': [[-1, 0], [-2, 0]],
+                'down': [[1, 0], [2, 0]],
+                'left': [[0, -1], [0, -2]],
+                'right': [[0, 1], [0, 2]]
+            }
+
+            p1 = new Point(perPosition.x + oPositions[dir][0][0], perPosition.y + oPositions[dir][0][1]);
+            p2 = new Point(perPosition.x + oPositions[dir][1][0], perPosition.y + oPositions[dir][1][1]);
+
+            // 如果人可以移动，更新游戏数据，重绘地图
+            if (Trygo(p1, p2)) {
+                moveTimes++;
+                showMoveInfo();
+            }
+            // 重绘地板;
+            DrawFloor();
+            // 重绘更新数据的地图
+            DrawMap(curMap);
+            // 如果进入下一关
+            if (checkFinish()) {
+                alert('恭喜过关');
+                NextLevel(1);
+            }
+        }
+
+        //判断是否推成功
+        function checkFinish() {
+            for (var i = 0; i < curMap.length; i++) {
+                for (var j = 0; j < curMap[i].length; j++) {
+                    //当前移动过的地图和初始地图进行比较，若果初始地图上的陷进参数在移动之后不是箱子的话就指代没推成功
+                    if (curLevel[i][j] == 2 && curMap[i][j] != 3 || curLevel[i][j] == 5 && curMap[i][j] != 3) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        //下一关
+        function NextLevel(i) {
+            //iCurLevel当前的地图关数
+            iCurLevel = iCurLevel + i;
+            if (iCurLevel < 0) {
+                iCurLevel = 0;
+                return;
+            }
+            var len = levels.length;
+            if (iCurLevel > len - 1) {
+                iCurLevel = len - 1;
+            }
+            initLevel();//初始当前等级关卡
+            moveTimes = 0;//游戏关卡移动步数清零
+            showMoveInfo();//初始化当前关卡数据
+        }
+        //判断小人是否能够移动
+        function Trygo(p1, p2) {
+            if (p1.x < 0) return false;//若果超出地图的上边，不通过
+            if (p1.y < 0) return false;//若果超出地图的左边，不通过
+            if (p1.x > curMap.length) return false;//若果超出地图的下边，不通过
+            if (p1.y > curMap[0].length) return false;//若果超出地图的右边，不通过
+            if (curMap[p1.x][p1.y] == 1) return false;//若果前面是墙，不通过
+            if (curMap[p1.x][p1.y] == 3 || curMap[p1.x][p1.y] == 5) {//若果小人前面是箱子那就还需要判断箱子前面有没有障碍物(箱子/墙)
+                if (curMap[p2.x][p2.y] == 1 || curMap[p2.x][p2.y] == 3) {
+                    return false;
+                }
+                //若果判断不成功小人前面的箱子前进一步
+                curMap[p2.x][p2.y] = 3;//更改地图对应坐标点的值
+                //console.log(curMap[p2.x][p2.y]);
+            }
+            //若果都没判断成功小人前进一步
+            curMap[p1.x][p1.y] = 4;//更改地图对应坐标点的值
+            //若果小人前进了一步，小人原来的位置如何显示
+            var v = curLevel[perPosition.x][perPosition.y];
+            if (v != 2)//若果刚开始小人位置不是陷进的话
+            {
+                if (v == 5)//可能是5 既有箱子又陷进
+                {
+                    v = 2;//若果小人本身就在陷进里面的话移开之后还是显示陷进
+                } else {
+                    v = 0;//小人移开之后之前小人的位置改为地板
+                }
+            }
+            //重置小人位置的地图参数
+            curMap[perPosition.x][perPosition.y] = v;
+            //若果判断小人前进了一步，更新坐标值
+            perPosition = p1;
+            //若果小动了 返回true 指代能够移动小人
+            return true;
+        }
+        //完善关卡数据及游戏说明
+        function showMoveInfo() {
+            msg.innerHTML = "第" + (iCurLevel + 1) + "关 移动次数: " + moveTimes;
+        }
+        //游戏说明
+        var showhelp = false;
+        function showHelp() {
+            showhelp = !showhelp;
+            if (showhelp) {
+                msg.innerHTML = "用键盘上的上、下、左、右键移动小人，把箱子全部推到小球的位置即可过关。箱子只可向前推，不能往后拉，并且小人一次只能推动一个箱子。";
+            } else {
+                showMoveInfo();
+            }
+        }
+
+        //克隆二维数组
+        function copyArray(arr) {
+            var b = [];//每次移动更新地图数据都先清空再添加新的地图
+            for (var i = 0; i < arr.length; i++) {
+                b[i] = arr[i].concat();//链接两个数组
+            }
+            return b;
+        }
+    </script>
+</body>
+
+</html>
