@@ -29,3 +29,11 @@ npm run server
 ## [task3-Sokoban](https://github.com/crystalcst/Practise-Demos/tree/master/task3-sokoban)
 1. This task is using es5 + canvas
 
+## [task3-Sokoban](https://github.com/crystalcst/Practise-Demos/tree/master/task4-jQuerySourceCode)
+sourcecode analysis on .css .on .init
+```
+Realize
+$('h1').on('click', function(){
+   $(this).css('color', 'red');
+})
+```
